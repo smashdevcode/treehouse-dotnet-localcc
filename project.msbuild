@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Start">
+
+	<!-- Variables -->
+	<PropertyGroup>
+
+		<!-- Project Name -->
+		<ProjectName>TreehouseDefense</ProjectName>
+
+		<!-- Test Project Name -->
+		<TestProjectName>$(ProjectName)Tests</TestProjectName>
+
+		<!-- Source Code Folder -->
+		<SourceDir>src</SourceDir>
+
+		<!-- Files Folder -->
+		<FilesDir>files</FilesDir>
+
+		<!-- Zip File Name -->
+		<ZipFileName>project</ZipFileName>
+		
+	</PropertyGroup>
+
+	<UsingTask
+    AssemblyFile="$(SourceDir)\packages\xunit.runner.msbuild.2.2.0\build\net452\xunit.runner.msbuild.dll"
+    TaskName="Xunit.Runner.MSBuild.xunit"/>
+
+	<Import 
+		Project="$(SourceDir)\packages\MSBuildTasks.1.5.0.235\tools\MSBuild.Community.Tasks.Targets" />
+
+	<Target Name="Start" DependsOnTargets="PreCleanup;Build;Test;CopyFiles;Zip;PostCleanup">
+	</Target>
+
+	<Target Name="PreCleanup">
+		<RemoveDir Directories="$(FilesDir)"/>
+		<Delete Files="$(ZipFileName).zip"/>
+	</Target>
+
+	<Target Name="PostCleanup">
+		<RemoveDir Directories="$(FilesDir)"/>
+	</Target>
+
+	<Target Name="Build">
+		<MSBuild Projects="$(SourceDir)\$(ProjectName).sln" Properties="Configuration=Release"/>
+	</Target>
+
+  <Target Name="Test">
+    <xunit Assemblies="$(SourceDir)\$(TestProjectName)\bin\Release\$(TestProjectName).dll" />
+  </Target>
+
+	<Target Name="CopyFiles">
+		<MakeDir Directories="$(FilesDir)"/>
+		<ItemGroup>
+			<Files
+				Include="$(SourceDir)\**\*.*"
+				Exclude="$(SourceDir)\packages\**\*.*;$(SourceDir)\$(ProjectName)\bin\**\*.*;$(SourceDir)\$(ProjectName)\obj\**\*.*;$(SourceDir)\$(TestProjectName)\bin\**\*.*;$(SourceDir)\$(TestProjectName)\obj\**\*.*">
+			</Files>
+		</ItemGroup>
+		<Copy SourceFiles="@(Files)" DestinationFolder="$(FilesDir)\%(RecursiveDir)"/>
+	</Target>
+	
+	<Target Name="Zip">
+		<CreateItem Include="$(FilesDir)\**\*.*" >
+			<Output ItemName="ZipFiles" TaskParameter="Include"/>
+		</CreateItem>
+		<Zip ZipFileName="$(ZipFileName).zip" WorkingDirectory="$(FilesDir)" Files="@(ZipFiles)" />
+	</Target>
+
+</Project>
