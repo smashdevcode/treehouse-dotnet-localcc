@@ -6,7 +6,13 @@ namespace TreehouseDefense.Tests
     {
         private Map _map3 = new Map(3, 3);
 
-        [Fact()]
+		//[Fact()]
+		//public void AlwaysFail()
+		//{
+        //    Assert.True(false);
+		//}
+
+		[Fact()]
         public void MapSizeTooSmall()
         {
             Assert.Throws<System.ArgumentOutOfRangeException>(() => new Map(0, 0));
